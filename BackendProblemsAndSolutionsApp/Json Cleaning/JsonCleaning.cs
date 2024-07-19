@@ -24,52 +24,51 @@ public class JsonCleaning
     {
         var data = JsonConvert.DeserializeObject<Dictionary<string,dynamic>>(strJson);
 
-        Dictionary<string, dynamic> resultListMain = [];
+        Dictionary<string, dynamic> result = [];
 
         foreach (var item in data!)
         {            
-            RepopulateObject(item.Key, item.Value, resultListMain);
+            RepopulateObject(item.Key, item.Value, result);
         }
-        return JsonConvert.SerializeObject(resultListMain);
+        return JsonConvert.SerializeObject(result);
     }
 
-    private static void RepopulateObject(string key, dynamic value, Dictionary<string, dynamic> resultListMain)
+    private static void RepopulateObject(string key, dynamic value, Dictionary<string, dynamic> resultDictionary)
     {
-        Type type = value.GetType();
         if (value is Int64)
         {
-            resultListMain.Add(key, value);
+            resultDictionary.Add(key, value);
         }
         else if (value is String)
         {
             if (value != "" && value != "-" && value != "N/A")
             {
-                resultListMain.Add(key, value);
+                resultDictionary.Add(key, value);
             }
         }
         else if (value is JArray jArray)
         {
-            List<string> strarr = [];
+            List<string> arrResult = [];
             foreach (var itemobj in jArray)
             {
                 if (itemobj.Value<string>() != "" && itemobj.Value<string>() != "-" && itemobj.Value<string>() != "N/A")
                 {
-                    strarr.Add(itemobj.Value<string>()!);
+                    arrResult.Add(itemobj.Value<string>()!);
                 }
             }
-            resultListMain.Add(key, strarr);
+            resultDictionary.Add(key, arrResult);
         }
         else
         {
             var json = JsonConvert.SerializeObject(value);
             var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
 
-            Dictionary<string, dynamic> resultListMain2 = [];
+            Dictionary<string, dynamic> recursionResult = [];
             foreach (var item in data!)
             {               
-                RepopulateObject(item.Key, item.Value, resultListMain2);
+                RepopulateObject(item.Key, item.Value, recursionResult);
             }
-            resultListMain.Add(key, resultListMain2);
+            resultDictionary.Add(key, recursionResult);
         }
     }
 }
