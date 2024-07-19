@@ -7,71 +7,55 @@ public class JsonCleaning
 {
     static void Main(string[] args)
     {
-        string uri = "https://coderbyte.com/api/challenges/json/json-cleaning";
-        
-        var result = GetCleandedJson(uri);
-        Console.WriteLine(result);
-    }
-
-    private static string GetCleandedJson(string url)
-    {
-        HttpClient client = new();
-        string result = client.GetStringAsync(url).Result;
-        return FormatJsonString(result);
+        var json = "{\"name\":{\"first\":\"Robert\",\"middle\":\"\",\"last\":\"Smith\"},\"age\":25,\"DOB\":\"-\",\"hobbies\":[\"running\",\"coding\",\"-\"],\"education\":{\"highschool\":\"N\\/A\",\"college\":\"Yale\"}}";
        
+        var result = CleanJson(json);
+        Console.WriteLine(JsonConvert.SerializeObject(result));
     }
-    private static string FormatJsonString(string strJson)
+   
+   
+    private static Dictionary<string, dynamic> CleanJson(string json)
     {
-        var data = JsonConvert.DeserializeObject<Dictionary<string,dynamic>>(strJson);
-
-        Dictionary<string, dynamic> result = [];
+        var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
+        var exclusions = new HashSet<string> { "", "-", "N/A", "n/a" };
+        Dictionary<string, dynamic> resultDictionary = [];
 
         foreach (var item in data!)
-        {            
-            RepopulateObject(item.Key, item.Value, result);
-        }
-        return JsonConvert.SerializeObject(result);
-    }
-
-    private static void RepopulateObject(string key, dynamic value, Dictionary<string, dynamic> resultDictionary)
-    {
-        var exclusions = new HashSet<string> { "", "-", "N/A", "n/a" };
-
-        switch (value)
         {
-            case long _:
-                resultDictionary.Add(key, value);
-                break;
+            var key = item.Key;
+            var value = item.Value;
+            switch (value)
+            {
+                case long _:
+                    resultDictionary.Add(key, value);
+                    break;
 
-            case string str:
-                if(!exclusions.Contains(str))
-                    resultDictionary.Add(key, str);
-                break;
+                case string str:
+                    if (!exclusions.Contains(str))
+                        resultDictionary.Add(key, str);
+                    break;
 
-            case JArray jArray:
-                var arrResult = new List<string>();
-                foreach (var itemobj in jArray)
-                {
-                    var itemStr = itemobj.Value<string>();
-                    if (!exclusions.Contains(itemStr!))
+                case JArray jArray:
+                    var arrResult = new List<string>();
+                    foreach (var itemobj in jArray)
                     {
-                        arrResult.Add(itemStr!);
+                        var itemStr = itemobj.Value<string>();
+                        if (!exclusions.Contains(itemStr!))
+                        {
+                            arrResult.Add(itemStr!);
+                        }
                     }
-                }
-                resultDictionary.Add(key, arrResult);
-                break;
+                    resultDictionary.Add(key, arrResult);
+                    break;
 
-            default:
-                var json = JsonConvert.SerializeObject(value);
-                var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
-                var recursionResult = new Dictionary<string, dynamic>();
-                foreach (var item in data!)
-                {
-                    RepopulateObject(item.Key, item.Value, recursionResult);
-                }
-                resultDictionary.Add(key, recursionResult);
-                break;
+                default:
+                    var json2 = JsonConvert.SerializeObject(value);
+                    var result = CleanJson(json2);
+                    resultDictionary.Add(key, result);
+                    break;
+            }
         }
+        return resultDictionary;
     }
 
 }
