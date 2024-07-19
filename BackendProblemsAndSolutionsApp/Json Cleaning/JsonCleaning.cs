@@ -36,40 +36,42 @@ public class JsonCleaning
     private static void RepopulateObject(string key, dynamic value, Dictionary<string, dynamic> resultDictionary)
     {
         var exclusions = new HashSet<string> { "", "-", "N/A", "n/a" };
-        if (value is Int64)
-        {
-            resultDictionary.Add(key, value);
-        }
-        else if (value is String)
-        {
-            if (!exclusions.Contains(value))
-            {
-                resultDictionary.Add(key, value);
-            }
-        }
-        else if (value is JArray jArray)
-        {
-            List<string> arrResult = [];
-            foreach (var itemobj in jArray)
-            {
-                if (!exclusions.Contains(itemobj.Value<string>()!))
-                {
-                    arrResult.Add(itemobj.Value<string>()!);
-                }
-            }
-            resultDictionary.Add(key, arrResult);
-        }
-        else
-        {
-            var json = JsonConvert.SerializeObject(value);
-            var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
 
-            Dictionary<string, dynamic> recursionResult = [];
-            foreach (var item in data!)
-            {               
-                RepopulateObject(item.Key, item.Value, recursionResult);
-            }
-            resultDictionary.Add(key, recursionResult);
+        switch (value)
+        {
+            case long _:
+                resultDictionary.Add(key, value);
+                break;
+
+            case string str:
+                if(!exclusions.Contains(str))
+                    resultDictionary.Add(key, str);
+                break;
+
+            case JArray jArray:
+                var arrResult = new List<string>();
+                foreach (var itemobj in jArray)
+                {
+                    var itemStr = itemobj.Value<string>();
+                    if (!exclusions.Contains(itemStr!))
+                    {
+                        arrResult.Add(itemStr!);
+                    }
+                }
+                resultDictionary.Add(key, arrResult);
+                break;
+
+            default:
+                var json = JsonConvert.SerializeObject(value);
+                var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
+                var recursionResult = new Dictionary<string, dynamic>();
+                foreach (var item in data!)
+                {
+                    RepopulateObject(item.Key, item.Value, recursionResult);
+                }
+                resultDictionary.Add(key, recursionResult);
+                break;
         }
     }
+
 }
