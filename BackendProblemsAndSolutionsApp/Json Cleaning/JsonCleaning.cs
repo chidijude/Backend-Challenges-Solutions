@@ -35,13 +35,14 @@ public class JsonCleaning
 
     private static void RepopulateObject(string key, dynamic value, Dictionary<string, dynamic> resultDictionary)
     {
+        var exclusions = new HashSet<string> { "", "-", "N/A", "n/a" };
         if (value is Int64)
         {
             resultDictionary.Add(key, value);
         }
         else if (value is String)
         {
-            if (value != "" && value != "-" && value != "N/A")
+            if (!exclusions.Contains(value))
             {
                 resultDictionary.Add(key, value);
             }
@@ -51,7 +52,7 @@ public class JsonCleaning
             List<string> arrResult = [];
             foreach (var itemobj in jArray)
             {
-                if (itemobj.Value<string>() != "" && itemobj.Value<string>() != "-" && itemobj.Value<string>() != "N/A")
+                if (!exclusions.Contains(itemobj.Value<string>()!))
                 {
                     arrResult.Add(itemobj.Value<string>()!);
                 }
