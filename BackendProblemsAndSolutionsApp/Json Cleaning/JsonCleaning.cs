@@ -7,14 +7,13 @@ public class JsonCleaning
 {
     static void Main(string[] args)
     {
-        Console.WriteLine("Hello, World!");
         string uri = "https://coderbyte.com/api/challenges/json/json-cleaning";
         
-        var result = getString(uri);
+        var result = GetCleandedJson(uri);
         Console.WriteLine(result);
     }
 
-    private static string getString(string url)
+    private static string GetCleandedJson(string url)
     {
         HttpClient client = new();
         string result = client.GetStringAsync(url).Result;
