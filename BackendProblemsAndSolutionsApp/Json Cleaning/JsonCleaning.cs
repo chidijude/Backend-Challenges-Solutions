@@ -14,11 +14,11 @@ public class JsonCleaning
     }
    
    
-    private static Dictionary<string, dynamic> CleanJson(string json)
+    private static Dictionary<string, object> CleanJson(string json)
     {
-        var data = JsonConvert.DeserializeObject<Dictionary<string, dynamic>>(json);
+        var data = JsonConvert.DeserializeObject<Dictionary<string, object>>(json);
         var exclusions = new HashSet<string> { "", "-", "N/A", "n/a" };
-        Dictionary<string, dynamic> resultDictionary = [];
+        Dictionary<string, object> resultDictionary = [];
 
         foreach (var item in data!)
         {
@@ -39,7 +39,7 @@ public class JsonCleaning
                     var arrResult = new List<string>();
                     foreach (var itemobj in jArray)
                     {
-                        var itemStr = itemobj.Value<string>();
+                        var itemStr = (string)itemobj!;
                         if (!exclusions.Contains(itemStr!))
                         {
                             arrResult.Add(itemStr!);
