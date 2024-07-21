@@ -40,9 +40,9 @@ public class JsonCleaning
                     foreach (var itemobj in jArray)
                     {
                         var itemStr = (string)itemobj!;
-                        if (!exclusions.Contains(itemStr!))
+                        if (!exclusions.Contains(itemStr))
                         {
-                            arrResult.Add(itemStr!);
+                            arrResult.Add(itemStr);
                         }
                     }
                     resultDictionary.Add(key, arrResult);
